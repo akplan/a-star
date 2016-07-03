@@ -1,5 +1,11 @@
 package model;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /* TODO:
  * - complete parsemaze and parsepoint functions
  * - figure out what the format is for points
@@ -42,12 +48,40 @@ public class Maze {
 		setStart(parsePoints(start));
 		setGoal(parsePoints(goal));
 		setMaze(parseMaze(filepath));
+		if (this.maze == null){
+			System.out.println("ERROR initializing Maze.");
+		}
 	}
 	
 	// For parsing the Maze textfile.
 	public char[][] parseMaze(String filepath){
 		char[][] newMaze = new char[100][100];
+		FileInputStream fis;
+		BufferedReader reader;
 		
+		try{
+			fis = new FileInputStream(filepath);
+			reader = new BufferedReader(new InputStreamReader(fis));
+			String line;
+			
+			line = reader.readLine();
+			for(int i=0; i<newMaze.length && line != null; i++){
+				char[] linearray = line.toCharArray();
+				newMaze[i] = linearray;
+				line = reader.readLine();
+			}
+			
+			fis.close();
+			reader.close();
+		}catch(FileNotFoundException e1){
+			System.out.println("ERROR: file \""+filepath+"\" does not exist.");
+			e1.printStackTrace();
+			return null;
+		}catch(IOException e2){
+			System.out.println("Error: IOException");
+			e2.printStackTrace();
+			return null;
+		}
 		return newMaze;
 	}
 	
