@@ -6,19 +6,19 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
-/* TODO:
- * - complete parse point functions
- * - figure out what the format is for points
+
+/* HW 1: 		Implementing A*
+ * Maze.java: 	Stores information about obstacles, and prints the map.
+ * Author: 		Alyssa Plan
  */
-
 public class Maze {
 	private char[][] maze;
 	
 	// Start and Goal locations are stored in a 2d Array.
-	private Point start;
-	private Point goal;
-	private Point current;
+	private Node start;
+	private Node goal;
 	
 	// Getter/setter functions for each object.
 	public char[][] getMaze(){
@@ -29,36 +29,28 @@ public class Maze {
 		this.maze = maze;
 	}
 	
-	public Point getStart(){
+	public Node getStart(){
 		return start;
 	}
 	
-	public void setStart(Point start){
+	public void setStart(Node start){
 		this.start = start;
 	}
 	
-	public Point getGoal(){
+	public Node getGoal(){
 		return goal;
 	}
 	
-	public void setGoal(Point goal){
+	public void setGoal(Node goal){
 		this.goal = goal;
 	}
-	
-	public Point getCurrent(){
-		return current;
-	}
-	
-	public void setCurrent(Point current){
-		this.current = current;
-	}
+
 	
 	// Constructors for Maze object.
 	public Maze(String filepath, String start, String goal){
 		setMaze(parseMaze(filepath));
-		setStart(parsePoints(start));
-		setGoal(parsePoints(goal));
-		setCurrent(getStart());
+		setStart(new Node(parsePoints(start)));
+		setGoal(new Node(parsePoints(goal)));
 		
 		if (this.maze == null){ // checks to see if maze was properly initialized
 			System.out.println("ERROR initializing Maze.");
@@ -67,7 +59,7 @@ public class Maze {
 	
 	// For parsing the Maze text file.
 	public char[][] parseMaze(String filepath){
-		char[][] newMaze = new char[100][100];
+		char[][] newMaze = new char[101][101];
 		FileInputStream fis;
 		BufferedReader reader;
 		
@@ -140,10 +132,10 @@ public class Maze {
 		
 		// Check if point can be reached (point is not on an obstacle.)
 		if(this.getMaze()[x-1][y-1] == '#'){
-			System.out.println("Error: Point cannot be reached.");
+			System.out.println("Error: Point is on top of an obstacle and cannot be reached.");
 			return null;
 		}
-		newPoint = new Point(x-1,y-1);
+		newPoint = new Point(x,y);
 		
 		return newPoint;
 	}
@@ -152,13 +144,13 @@ public class Maze {
 	
 	// Prints maze for debug purposes.
 	public void printMaze(){
-		System.out.println("Start: "+getStart().toString());
-		System.out.println("Goal: "+getGoal().toString());
+		System.out.println("Start: "+getStart().getPoint().toString());
+		System.out.println("Goal: "+getGoal().getPoint().toString());
 		for(int i = 0; i < this.getMaze().length;i++){
-			for(int j=0; j < this.getMaze()[0].length;j++){
-				if(i == getStart().getX() && j == getStart().getY()){
+			for(int j = 0; j < this.getMaze()[0].length;j++){
+				if(i == getStart().getPoint().getX()-1 && j == getStart().getPoint().getY()-1){
 					System.out.print("S");
-				}else if(i == getGoal().getX() && j == getGoal().getY()){
+				}else if(i == getGoal().getPoint().getX()-1 && j == getGoal().getPoint().getY()-1){
 					System.out.print("G");
 				}else{
 					System.out.print(this.getMaze()[i][j]);
@@ -168,12 +160,28 @@ public class Maze {
 		}
 	}
 	
-	public boolean move(int x, int y){
-		if(!current.canMoveThere(x, y, this)){
-			return false;
-		}else{
-			current = new Point(x,y);
-			return true;
+	/* Prints the A* path taken to get to the goal,
+	 * for debug purposes.
+	 * I have an easier time visualizing it than
+	 * looking at a list of numbers.
+	 */
+	public void printPath(ArrayList<Node> path){
+		System.out.println("Start: "+getStart().getPoint().toString());
+		System.out.println("Goal: "+getGoal().getPoint().toString());
+		for(int i = 1; i <= this.getMaze().length;i++){
+			for(int j = 1; j <= this.getMaze()[0].length;j++){
+				Node tmp = new Node(new Point(i,j));
+				if(tmp.equals(getStart())){
+					System.out.print("S");
+				}else if(tmp.equals(getGoal())){
+					System.out.print("G");
+				}else if(path.contains(tmp)){
+					System.out.print("x");
+				}else{
+					System.out.print(this.getMaze()[i-1][j-1]);
+				}	
+			}
+			System.out.println();
 		}
 	}
 	
